@@ -34,11 +34,7 @@ contract BatchCollector is AccessControl {
     /// @param destinations Array of destination addresses
     /// @param executor Address of executor
     event BatchCollected(
-        address[] sources,
-        IERC20[] tokens,
-        uint256[] amounts,
-        address[] destinations,
-        address executor
+        address[] sources, IERC20[] tokens, uint256[] amounts, address[] destinations, address executor
     );
 
     /// @notice Constructor
@@ -60,31 +56,24 @@ contract BatchCollector is AccessControl {
         uint256[] calldata amounts,
         address[] calldata destinations
     ) external onlyRole(MANAGER_ROLE) {
-        if (
-            sources.length != tokens.length ||
-            tokens.length != amounts.length ||
-            amounts.length != destinations.length
-        ) {
+        if (sources.length != tokens.length || tokens.length != amounts.length || amounts.length != destinations.length)
+        {
             revert ArrayLengthsMismatch();
         }
 
         for (uint256 i = 0; i < sources.length; i++) {
             if (sources[i] == address(0)) revert ZeroSourceAddressNotAllowed();
-            if (address(tokens[i]) == address(0))
+            if (address(tokens[i]) == address(0)) {
                 revert ZeroTokenAddressNotAllowed();
+            }
             if (amounts[i] == 0) revert ZeroAmountNotAllowed();
-            if (destinations[i] == address(0))
+            if (destinations[i] == address(0)) {
                 revert ZeroDestinationAddressNotAllowed();
+            }
 
             tokens[i].safeTransferFrom(sources[i], destinations[i], amounts[i]);
 
-            emit BatchCollected(
-                sources,
-                tokens,
-                amounts,
-                destinations,
-                msg.sender
-            );
+            emit BatchCollected(sources, tokens, amounts, destinations, msg.sender);
         }
     }
 }
